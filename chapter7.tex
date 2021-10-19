@@ -1,0 +1,20 @@
+\chapter{Conclusion}
+
+This work demonstrates the requirements and conditions for fast and reliable scheduling of discrete-event simulation runs in a heterogeneous edge computing environment.
+
+Simulations can be intense computational tasks. Researchers often need to procure cloud resources to run simulations in an acceptable duration. Cloud resources can be costly to operate and involve bureaucratic hurdles. The spontaneous and cost-efficient involvement of idle resources like old laptops or Raspberry Pis is with related programs not possible. The distribution of simulations to many end-user devices is an attractive way to improve simulation run times without producing huge bills. 
+
+OMNeT++ is a discrete event simulation framework. Simulations written with OMNeT ++ can be distributed relatively easily because they consist of smaller simulation runs that can be operated independently and in parallel.
+
+Related efforts that distribute and parallelize simulations written with OMNeT++ are mostly deprecated and lack the ability to add resource providers on the fly and in separate networks. The efforts are not embedded into a peer-to-peer network like the tool developed by this thesis.
+
+This thesis developed a novel approach for distributing OMNeT++ simulations using Go, gRPC, Docker, and UDP-Holepunching techniques. 
+Resource consumers and providers try to communicate directly to reduce traffic over a central point. Providers have a robust allocation process in place to assign means to consumers. The provider executables are bundled with an OMNeT++ environment into a Docker image to ensure a safe and convenient deployment method. The simulation results are downloaded and extracted to the source directory like they were run locally.
+
+In real-world trials, the execution time for the simulations was reduced significantly by employing multiple devices. The effect of nearly complete parallelization is quite impressive. It proves that processing a simulation in a distributed application makes much sense despite some overhead expenses. For example, it shows that a simulation that executes with 64 CPUs is about ten times faster than a process with only one CPU. 
+
+The technical foundation of peer-to-peer communication over gRPC between providers and consumers can also be applied to other tasks. A remote SDK could be developed to execute generic code on providers, which extends possibilities significantly for many areas beyond simulations. A batch queuing system for generic tasks could be developed relatively quickly because most concepts for delivery and transport are already in place.
+
+The optimization of bottle negs like uploading and downloading files had beneficial effects for the user experience. An effort worth looking at is the evolution of the linear storage package to a full-scale bit-torrent like a distributed storage system that circumvents upload and download thresholds. A second approach is the central storage of files on high bandwidth machines.
+
+Another appealing research area is the research in building a "social network" for sharing resources. It would be interesting to understand under which circumstances people are inclined to share resources with others. One research question could be how much consumers are inclined to pay and how much reward providers expect for their services. A bidding system may be interesting to contemplate. In conjunction with this, another riveting area of research is the exploration of intelligent scheduling on algorithms on the provider and consumers' side. But also other incentives than money offer opportunities, like the devotion of resources to sciences in user-aligned concerns.

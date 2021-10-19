@@ -1,0 +1,109 @@
+ % packages
+	\usepackage[ngerman,german, english]{babel}
+	\usepackage[utf8]{inputenc}
+	\usepackage[T1]{fontenc}
+  \usepackage[pdftex]{color} 
+  \usepackage{setspace}
+  \usepackage[pdftex]{graphicx}
+  \usepackage{colortbl}	
+  \usepackage{xcolor}
+  \usepackage{soul}
+\usepackage{geometry}	
+	\usepackage[final]{listings}  
+  \usepackage{ae,aecompl}
+  \usepackage{todo}
+
+ 
+  
+  % Crossing out text with \sout; Option 'normalem' prevents
+	% redefining the makro \emph{}  
+	\usepackage[normalem]{ulem}	
+	
+	% ok-symbol etc.
+  \usepackage{amsfonts} 
+  
+  % the three following packages replace the palatino-package.
+	% for reasons look at 'Das Latex2-Sündenregister' of Mart Trettin
+	\usepackage{mathpazo}
+	\usepackage[scaled=.95]{helvet}
+	\usepackage{courier}
+	\setkomafont{sectioning}{\normalcolor\bfseries}
+
+	% pdfbookmarks 
+	% (generates TOC and links for PDF)
+  \usepackage[
+  	pdfstartview=FitH,   
+  	pdffitwindow=true,
+  	colorlinks,
+  	linkcolor=black,
+  	anchorcolor=black,
+  	citecolor=black,
+  	urlcolor=black
+  ]{hyperref}
+  
+  % Lines for header and footer 
+	\usepackage[headsepline,footsepline]{scrlayer-scrpage}
+	
+	\usepackage[automake, nonumberlist, nopostdot, toc, acronym]{glossaries}
+	\setglossarystyle{listdotted}
+	\makeglossaries
+	
+	% set page style 
+	\pagestyle{scrheadings}
+	
+	% adjustin gheader and footer (Koma-Guide: 'Kopf- und Fußzeilen mit scrpage2')
+	\ohead[\pagemark]{\pagemark}
+	\chead[\headmark]{\headmark}
+	\ofoot{}
+	
+	% Page style 'scrheadings' instead of predefined 'scrplain'
+	% also use for index und chapter pages
+	\renewcommand*{\chapterpagestyle}{scrheadings}
+	\renewcommand*{\indexpagestyle}{scrheadings}
+	\renewcommand*{\headfont}{\normalfont}
+	
+	
+	\addto\captionsenglish{
+		\renewcommand{\contentsname}{Table of Contents}}
+	
+	% Empty pages creted with cleardoublepage shall
+	% use the page style 'scrheadings' (Koma-Guide: 'Vakatseiten').
+	\KOMAoptions{cleardoublepage=scrheadings}
+    
+  % line spacing
+  \setstretch{1.24}
+  
+	% Margins	
+	\setlength{\textwidth}{15cm}        % Textbreite
+	\setlength{\textheight}{24cm}       % Texthöhe
+	\setlength{\topmargin}{-12mm}       % oberer Rand
+  
+  % PDF document information
+  \hypersetup
+  {
+  	pdftitle     = {Titel},
+  	pdfsubject   = {Universität Hamburg / DOS / Art des Artikels},
+  	pdfauthor    = {Vorname Name},
+  	pdfkeywords  = {Keywords},
+  	plainpages   = false, pdfpagelabels
+  }
+  
+  % Formatting listings (source code)
+  \definecolor{lightgrey}{rgb}{0.90,0.90,0.90}
+  \lstloadlanguages{XML}
+  \lstset{
+    tabsize=2,
+    escapeinside={(*@}{@*)},
+    captionpos=t,
+    framerule=0pt,
+    backgroundcolor=\color{lightgrey},
+    basicstyle=\small\ttfamily,
+    keywordstyle=\small\bfseries,
+    numbers=left,
+    fontadjust
+  }
+  
+% table names as headings
+\KOMAoptions{captions=tableheading} 
+
+     

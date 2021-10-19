@@ -1,0 +1,100 @@
+\chapter{Fundamentals}
+
+The following Chapter will outline the basics concepts of distributed computing, discrete event simulations in conjunction with OMNeT++, remote procedure calls with gRPC, and the QUIC protocol.
+
+\section{Distributed Computing}
+
+A distributed computer system consists of multiple software components located on multiple computers but runs as a single system. The computers that belong to distributed systems can be physically close together and connected by a local network, or they can be geographically distant and connected by a wide area network \cite{ibm:distributedcomputing}.
+
+Grid computing is the use of widely distributed computer resources to reach a common goal. A computing grid can be thought of as a distributed system with non-interactive workloads that involve many files. Grid computing is distinguished from conventional high-performance computing systems such as cluster computing \cite{foster2008cloud}. In grid computers each node is set to perform a different task/application. In high-performance computing systems each computer code works on the same task/application. Grid computers also tend to be more heterogeneous and geographically dispersed (thus not physically coupled) compared to cluster computers \cite{wiki:Grid_computing}.
+
+Edge computing is a paradigm in which substantial computing and storage resources are placed at the Internet’s edge in close proximity to mobile devices or sensors that generate and process data \cite{satyanarayanan2017emergence}. In the Cloud computing paradigm, most of the computations happen in a centralized cloud. The cloud computing paradigm may suffer longer latency, which impairs user experience \cite{shi2016edge}. 
+
+\section{OMNeT++ Discrete Event Simulator}
+
+A discrete-event simulation (DES) models a system as a discrete sequence of events in time. Each event occurs at a particular point in time and signals a change of state in the system \cite{wiki:des}. They are contrasted by continuous simulations which refers to a computer model of a physical system that continuously tracks system response according to a set of equations involving differential equations \cite{wiki:contsim}.
+
+OMNeT++ is a discrete event network simulation framework. It provides infrastructure and tools for writing simulations. OMNeT++ can be installed with an integrated development environment (IDE) but it can also be run as a command line tool. It is used to simulate various problem domains for example modeling of wired and wireless communication networks, protocol modeling, and evaluating performance aspects of complex software systems. In general it is used for modeling and simulating any system that consists of discrete events. OMNeT++ simulations are composed of reusable modules that are commonly written in C++. Modules are generic parts and can be used across various projects \cite{oppSimulationManual5.6.1}.
+
+The simulation needs to be compiled before execution. A makefile for the simulation can be created using the opp\_makemake command line tool installed with OMNeT++. Opp\_makemake can be configured to output either a simulation executable or a static or dynamic library. The simulation can be compiled afterwards by calling make.
+
+OMNeT++ uses NED files to define components and to assemble them into larger units like networks. INI files tell the simulation program which network should be simulated (NED files may contain several networks). They are also used to pass parameters and parameter combinations to the model. Explicit seeds for the random number generators are specified the same way. OMNeT++ can be used for parameter studies, where a combination of different parameters is the subject of study. INI files specify these parameter combinations. Each INI file can have various parameter configurations. Each parameter combination belongs to one simulation run that can be executed concurrently \cite{omnetpp:tictoc}.
+
+OMNeT++ simulations are composed out of reusable modules. Modulus are commonly written in C++. Hence they need to be compiled before the execution.
+
+\begin{lstlisting}[caption=Example INI file]
+[Config Tictoc7]
+network = Tictoc7
+# argument to exponential() is the mean; truncnormal() returns values from
+# the normal distribution truncated to nonnegative values
+Tictoc7.tic.delayTime = exponential(3s)
+Tictoc7.toc.delayTime = truncnormal(3s,1s)
+
+[Config Tictoc16]
+network = Tictoc16
+**.tic[1].hopCount.result-recording-modes = +histogram
+**.tic[0..2].hopCount.result-recording-modes = -vector
+
+[Config Tictoc17]
+network = Tictoc17
+
+[Config TicToc18]
+network = TicToc18
+sim-time-limit = 250h
+**.tic[*].hopCount.result-recording-modes = +vector
+*.numCentralNodes = ${N=100..200 step 4}
+repeat = 3
+\end{lstlisting}
+
+The simulation can be run as an executable or as a library, to run it NED and INI files need to be passed to it. If the simulation is compiled as an executable, the executable will be called with "-n" to specify the NED paths and "-f" to pass the INI file paths. If the simulation was compiled as a library, the command is "opp\_run -l LIBRARY." The parameter "-u Cmdenv" denotes that the simulation is run from a command-line environment. This parameter prevents the attempt to start the OMNeT++ IDE. The parameter "-c" tells the simulation which configuration from the INI files should be executed.
+
+Execute the simulation:
+\begin{itemize}
+  \item Run the simulation as an executable: "./tictoc -n . -f omnetpp.ini -u Cmdenv -c TicToc18"
+  \item Run the simulation as a library: "opp\_run -l tictoc -n . -f omnetpp.ini -u Cmdenv -c TicToc18"
+\end{itemize}
+
+The simulation can output all configurations with the associated number of runs.
+\begin{itemize}
+  \item Extract configurations: "./tictoc -f omnetpp.ini -n . -a"
+  \item Extract run numbers: "./tictoc -f omnetpp.ini -n . -c TicToc18 -q runnumbers"
+  \item Execute a simulation run: "./tictoc -f omnetpp.ini -n . -c TicToc18 -r 123"
+\end{itemize}
+
+\section{gRPC}
+
+In distributed computing, a remote procedure call (RPC) is when a computer program calls a procedure on another computer. The procedure is, as a result of this, called like a locally coded function. The programmer does not have to explicitly code the details of the remote interaction and can write the same code whether the procedure is local or remote. The caller is the client, and the executor is the server \cite{wiki:Remote_procedure_call}.
+
+gRPC is a request-response message-passing system for remote procedure calls. gRPC is based around the idea of defining a service, specifying the methods that can be called remotely with their parameters and return types. The server implements this interface and runs a gRPC server to handle client calls. The client has a local object that provides the same methods as the server \cite{grpc:introduction}.
+
+\begin{figure}[h]
+  \centering
+  \includesvg[width=250pt]{images/gRPC-Overview.svg}
+  \caption{Overview of gRPC communication. Source: https://grpc.io/docs/what-is-grpc/introduction/}
+  \label{fig:grpcoverview}
+\end{figure}
+
+gRPC clients and servers can run and communicate with each other in a variety of environments. For example, gRPC can create a server in Java with clients written in Go, Python, or Ruby. Figure \ref{fig:grpcoverview} shows this.
+
+gRPC uses Protocol Buffers as the Interface Definition Language (IDL) for describing both the service interface and the structure of the payload messages. Each message contains a series of name-value pairs called fields. Once the data structures are specified, the protocol buffer compiler protoc generates client- and server-side code in the preferred programming language.
+
+gRPC lets you define four kinds of service method:
+\begin{itemize}
+    \item "Unary RPCs where the client sends a single request to the server and gets a single response back, just like a normal function call." \cite{grpc:concepts}
+    \item "Server streaming RPCs where the client sends a request to the server and gets a stream to read a sequence of messages back. The client reads from the returned stream until there are no more messages." \cite{grpc:concepts}
+    \item "Client streaming RPCs where the client writes a sequence of messages and sends them to the server, again using a provided stream. Once the client has finished writing the messages, it waits for the server to read them and return its response." \cite{grpc:concepts}
+    \item "Bidirectional streaming RPCs where both sides send a sequence of messages using a read-write stream. The two streams operate independently, so clients and servers can read and write in whatever order they like: for example, the server could wait to receive all the client messages before writing its responses, or it could alternately read a message then write a message, or some other combination of reads and writes. The order of messages in each stream is preserved." \cite{grpc:concepts}
+\end{itemize}
+
+RPCs can convey metadata in the form of a list of key-value pairs, where the keys are strings, and the values are typically strings. gRPC allows clients to specify how long they want to wait for an RPC to complete before the RPC exits with a timeout error. The server can query to see if a particular RPC has a deadline. Either the client or the server can cancel an RPC at any time. A cancellation terminates the RPC immediately.
+
+\section{Peer-to-Peer (P2P) Networks}
+
+Network address translation (NAT) is a method for routing devices of mapping an IP address space into another. NAT is an essential tool in maintaining global address space in the face of IPv4 address exhaustion \cite{durand2011dual}. One IP address of a NAT gateway can be shared across an entire private network. There are various types of NATs, including Full Cone NATs, Restricted Cone NATs, Port Restricted Cone NATs, and Symmetric NATs. \cite{wei2008new}
+
+Peer-to-Peer (P2P) networks work on the presumption that all nodes in the network are connectable. However, NAT boxes and firewalls prevent connections to many nodes on the Internet. For UDP-based protocols, the UDP hole-punching technique has been proposed to mitigate this problem. \cite{halkes2011udp}
+
+\section{QUIC}
+
+QUIC is an abbreviation for "Quick UDP Internet Connections." It is an encrypted, multiplexed, and low-latency transport protocol. One advantage of QUIC against TCP is that it is a user-space transport protocol that can be changed easier than kernel-based approaches like TCP. QUIC eliminates Protocol Entrenchments, Implementation Entrenchments, Handshake Delays, Head-of-line Blocking Delays. It also has mechanisms for Loss Recovery and NAT Rebinding. \cite{langley2017quic}
+

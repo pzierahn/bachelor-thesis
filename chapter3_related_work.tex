@@ -1,0 +1,46 @@
+\chapter{Related Work}
+
+There have been several related efforts to use distribution across multiple devices to advance the simulation execution time. None of which considers using end-user devices and edge devices for simulation execution. Table \ref{tab:relatedworks} shows relevant features that are covert by the approaches.
+
+\begin{table}[h]
+\begin{center}
+    \begin{tabular}{ | m{10em} | m{6em}| m{6em} | m{6em} | m{5em} | }
+      \hline
+      Project & Edge devices and end-user devices & Peer-to-peer network & Spontaneous resource usage & Deprecated \\ 
+      \hline
+      Deploying on AWS & No & No & No & No \\
+      \hline
+      Remote OMNeT++ & No & No & Yes & Yes \\
+      \hline
+      Grid based systems & No & No & Yes & Mostly \\
+      \hline
+    \end{tabular}
+    \caption{\label{tab:relatedworks} Related works}
+\end{center}
+\end{table}
+
+
+\section{Remote OMNeT++}
+Remote OMNeT++ is a now-discontinued effort to run simulations on a remote host. It creates a simulation environment that provides the same functionality whether used locally or remotely. Clients are equipped with web-based software that gives them the tools to connect to hosts, manage models and run a simulation. Processing Hosts are usually high-performance computers. Data Warehouses are high storage capacity machines that store models and simulation results. The program is written in Java and uses remote procedure calls to convey instructions. It comes with a "robust authentication and administration mechanism in place" \cite{erdei2002networked}.
+
+\section{AWS Deployment}
+The OMNeT++ website offers instructions on how to deploy and distribute simulations in the AWS cloud. Docker containers contain an OMNeT++ environment and the python worker software that executes the simulation. Simulation-runs are queued in a Redis database and dequeued by workers. AWS ECS instances deploy the containers. Simulations are offloaded by a Python script that adds the simulation-runs and model source to the Redis job queue \cite{omentpp:AWS}. Figure \ref{fig:omnetppaws} shows the architecture.
+
+\begin{figure}[h]
+  \centering
+  \includesvg[width=\textwidth]{images/omnetpp-aws.svg}
+  \caption{OMNeT++ AWS Architecture. Source: https://docs.omnetpp.org/tutorials/cloud/page2/}
+  \label{fig:omnetppaws}
+\end{figure}
+
+\section{Grid Computing}
+
+There are several other approaches that use grid computing.
+\begin{itemize}
+  \item Xgrid was a batch queueing system for Apple computers. It was intended to enable the ad hoc bundling of a group of Macs into a grid computing cluster. Seggelmann showed in this work how to exploit Xgrid installations for running OMNeT++ simulations \cite{seggelmann2009parallelizing}. The underlying Apple software that enabled the distribution of tasks over a network has been deprecated since OS X v10.8 \cite{wiki:xgrid}.
+  
+  \item The paper "Enabling OMNeT++-based Simulations on Grid Systems" describes how the gLite batch queuing system can be used to distribute OMNeT++ simulations \cite{kozlovszky2009enabling}. gLite has been fully retired since May 1, 2013 \cite{web:glite}.
+
+  \item RSerPool (Reliable Server Pooling) is an IETF protocol for server pool management and access \cite{dreibholz2008reliable}. It offers load balancing and failure handling capabilities. The SimProcTC toolchain offers makefiles and scripts to offload OMNeT++ simulations to remote hosts \cite{dreibholz2008powerful}. SimProcTC uses the RSerPool implementation to find suitable resource providers. The simulations are uploaded with all executables to the host and extracted there. A control script executes simulation-runs and retrieves the results. Parallelism is achieved via using parallel make jobs.
+
+\end{itemize}

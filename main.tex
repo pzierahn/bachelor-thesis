@@ -1,0 +1,61 @@
+% ---------------------------------------------------------------------
+% This document compiles with pdflatex and is made with Koma-Script. 
+%
+% The Template is based on the template of Michael
+% von Riegen, riegen@informatik.uni-hamburg.de, and
+% modified at some points
+% ---------------------------------------------------------------------
+\documentclass[11pt,DIV=15,BCOR=20mm,bibliography=totoc, listof=totoc]{scrbook}
+
+% Import of packages and options that refer to the whole document can be found in myPreamble.sty
+\usepackage{myPreamble}
+\usepackage{svg}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{multirow}
+\include{abbreviations}
+
+% useful if writing everything in one chapter
+%has no affection on input-commands
+% \includeonly{kapitel1}
+
+\begin{document}
+
+	% titlepage
+	\include{_titlepage}
+	\cleardoubleemptypage
+	\include{abstract}
+
+	% roman page numbering
+	%\frontmatter
+	
+	% lists (table of contents, list of figures, tables, abbreviations)
+	\tableofcontents
+	\listoffigures
+	\listoftables
+	\printglossary
+	\printglossary[title=List of Abbreviations,type=\acronymtype]	
+	
+	% arabic page numbering
+	\mainmatter
+	
+	\include{chapter1}
+	\include{chapter2_fundamentals}
+	\include{chapter3_related_work}
+	\include{chapter4_design}
+	\include{chapter5_implementation}
+	\include{chapter6_evaluation}
+	\include{chapter7}
+	\cleardoublepage
+	
+	% bibliography
+	\frontmatter
+	%\nocite{wiki:wissarbeit}
+	\bibliographystyle{alphadin}
+	\bibliography{references}
+	\cleardoublepage
+
+	% affidavit
+	\input{_eidversicherung}
+	
+\end{document}

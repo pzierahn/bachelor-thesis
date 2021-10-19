@@ -1,0 +1,27 @@
+\chapter{Introduction}
+
+\section{Motivation}
+\label{Motivation}
+
+Besides experiments and theoretical analytic methods, simulations are considered to be one epistemic source of new knowledge \cite{standford:simulations}. Simulations are used to explain how we should expect some system in the real world to behave under a particular set of circumstances \cite{ingalls2011introduction}.
+
+Extensive simulations like climate simulations or physical simulations \cite{10.1093/mnras/stt1403} require considerable resources to produce results in a reasonable time. Today many simulations are run on high-performance computers \cite{spataro2017high}. The cost of such devices is immensely high. The use of distributed edge computing might offer an alternative \cite{shi2016edge}.
+
+Simulations are particularly interesting in edge computing research. The paper "Decentralized Low-Latency Task Scheduling for Ad-Hoc Computing" \cite{edinger2021decentralized} is one example where simulations play an important role. Simulating and modeling these systems offers a valid alternative to costly real world experiments.
+
+Running simulations can be a time-consuming activity. For running simulations in practice, researchers often need to rent Cloud CPU-Clusters. These resources can be ex- pensive and involve bureaucratic challenges. CPU-Clusters also need lead time to be set up, which prevents spontaneous use. The addition of idle devices like laptops or Raspberry Pis is also currently not realizable. Employing idle edge resources across many networks could offer an attractive alternative to the described laborious process.
+
+
+\section{Goals of the Thesis}
+\label{Goals-of-the-Thesis}
+
+Accelerating more complex simulations is increasingly crucial for scientific progress. This thesis aims to enable the spontaneous use of local and distributed edge devices for discrete event simulations. Through distribution and parallelization, the simulation process should accelerate.
+
+This work aims to build a tool that can distribute discrete event simulations written with OMNeT++ to multiple end-user instances, execute it there and transfer the results back afterward. In the end, the source folder should contain the results like they were run locally. By distributing and parallelizing the simulation should thereby accelerate the execution compared to local ones.
+
+The tool should be able to connect to providers in the local network and other networks. Consumers and providers communicate directly over peer-to-peer connections to ensure maximal scalability. If the peer-to-peer connection fails, providers and consumers can use relay services.
+
+Users should be able to conveniently deploy the software in the form of Docker containers. The Docker container should include everything needed to participate in the resource sharing network to make it easy to add resources spontaneously.
+
+\section{Structure of this work}
+The fundamentals explain basic terminology and technologies used throughout this work. The related work chapter scrutinises related approaches for simulation distribution. The design Chapter exhibits the proposed distribution and parallelizing mechanisms. The implementation chapter lines out the technical realization of the in the design chapter proposed mechanisms. Real world experiment results are assessed in the evaluation chapter. The conclusion summarizes this work and the further research Section describes further research areas.

@@ -1,0 +1,166 @@
+\chapter{Design}
+
+The distribution process for discrete event simulations written with OMNeT++ can be described in the following phases:
+\begin{enumerate}
+    \item In the "Prepare for Distribution" phase, the simulation configurations will be sourced, and the simulation will be compressed.
+
+    \item The "Retrieve Provider List" retrieves a list of providers that can be connected and enlisted for the offloading process.
+
+    \item In the "Establish a Direct Connection" phase, a direct connection will be established to the providers.
+
+    \item With the "Deploy the Simulation" phase, the providers will be prepared to execute the simulation. The source code will be uploaded and compiled.
+
+    \item In the "Execute the Simulation" phase, the simulation-runs will be executed, and the results will be downloaded.
+\end{enumerate}
+
+\section{Entities}
+Providers are entities that provide resources to the network. These resources include CPU power, RAM, storage, and network. Consumers can use these resources. The provider software should support heterogeneous devices like Raspberry Pis, Personal computers, and cloud computing instances. Hence, the distribution must be robust and reliable because providers can always drop the execution if the host system needs the resources.
+
+Consumers are entities that like to offload OMNeT++ simulations. They distribute the simulation runs across providers to parallelize the execution.
+
+The broker is a central node for consumers and providers to exchange connection information.
+
+\section{Prepare for the Distribution}
+Before the consumer can distribute the simulation to providers, some paths in the local files system are required. Firstly, the path to the OMNeT++ simulation source directory which should be dispersed. Second, the path to a configuration file that holds the following information.
+
+\begin{itemize}
+    \item Paths to NED and INI files.
+    \item The OMNeT++ simulation configurations that should be run.
+    \item Information about the compile process. For example, if the simulation should be compiled and used as a library. More complex simulations, that for example use the opp\_featuretool, require a build script. For simple projects a Makefile is created automatically.
+    \item Paths to where to execute the simulation (basePath) and where the source code is located (sourcePath).
+    \item Which files should be excluded from the simulation and distribution process. For example the .git directory.
+    \item The path to the simulation executable or simulation library.
+\end{itemize}
+
+Afterward, the simulation source is compressed, and a unique simulation-id is generated. Next comes the connection phases to the providers.
+
+\section{Retrieve a Provider List}
+
+Before the consumer can connect to any provider, a list must be marshaled to hold all available providers. The consumer connects to the broker to acquire a list of available providers. The consumer then connects to the providers directly to reduce the traffic that would otherwise be sent through a central node. This is necessary to build an efficient and scalable network.
+
+The broker sends a list with providers and their corresponding dial addresses to the consumer every time a provider joins or leaves. Providers register at the broker with their unique provider-id. After a provider has registered at the broker, the consumer gets an event with a list of all providers and their connection ids. After each event, the consumer tries to connect to the new providers directly. See graphic \ref{fig:sequence-connect} for a visual impression of this process.
+
+\begin{figure}
+  \centering
+  \includesvg[width=400pt]{images/Sequence Connect.svg}
+  \caption{Sequence diagram for fetching the provider list}
+  \label{fig:sequence-connect}
+\end{figure}
+
+\section{Establish a Direct Connection}
+\label{Establish-a-Direct-Connection}
+
+There are three ways for providers and consumers to connect. The first is through discovery and connection in the local network. The second is using a peer-to-peer connection. The third is through a relay server which forwards all traffic if the peer-to-peer connection fails. An overview is depicted in Figure \ref{fig:connection-methods}.
+
+The consumer will connect to the provider by dialing the provider-id. The broker enables the exchange of the connection information to establish peer-to-peer connections and offers relay services.
+
+\begin{figure}[h]
+  \centering
+  \includesvg[width=400pt]{images/Top Down Connection.svg}
+  \caption{Overview of connection methods}
+  \label{fig:connection-methods}
+\end{figure}
+
+\subsection{Connect over the Local Network}
+\label{Connect-over-the-Local-Network}
+If consumers and providers are in the same network, they can connect directly to prevent unnecessary overhead. The consumer sends a UDP multicast broadcast with the dial-address as a payload to the local network. If the provider-id matches the dial address, providers in the local network will respond with a port number on which to connect. See graphic \ref{fig:Sequence-Stargate-Local}.
+
+\begin{figure}[h]
+  \centering
+  \includesvg[width=400pt]{images/Sequence Stargate Local.svg}
+  \caption{Sequence diagram for local stargate connection}
+  \label{fig:Sequence-Stargate-Local}
+\end{figure}
+
+\subsection{Connect over Peer-to-Peer through NAT Traversal}
+\label{Connect-over-Peer-to-Peer}
+
+If the local peer discovery and connection process fail, a peer-to-peer connection will be tried. In peer-to-peer connections, both peers connect to each other's IP and port number directly. Establishing such a connection can be challenging because of interfering NATs and firewalls \cite{wei2008new}. TCP-Holepunching or UDP-Holepunching techniques can be used to establish a connection through a NAT. This thesis will focus on UDP-Holepunching techniques because they are simpler to establish.
+
+Two steps are necessary to initiate a peer-to-peer connection over UDP. The first is the exchange of connection details, like IP addresses and port numbers. The second is the establishment of a direct connection. 
+
+The broker will handle the exchange of IP addresses and port numbers. Figure \ref{fig:Sequence-Peer-Resolving} depicts the entire process.
+
+\begin{figure}[h]
+  \centering
+  \includesvg[width=400pt]{images/Sequence Peer Resolving.svg}
+  \caption{Sequence diagram of the peer resolving process}
+  \label{fig:Sequence-Peer-Resolving}
+\end{figure}
+
+When peer-1 and peer-2 try to connect to one other, they have to send the same dedicated dial address to the broker. The broker will match those dial addresses and exchange the IPs and port numbers. 
+
+In step one, Peer-1 sends the dial address to the broker. With this step, the broker stores the incoming IP address and port number together with the dial address. Step one will be repeated periodically to prevent the deprecation of connection data. This happens for example when the IP address changes.
+
+The periodical repetition of step two is necessary to prevent the NAT gate from closing. The advantage is that the exchange does not have to occur immediately; a dialer can linger for some time.
+
+Step three checks if the dial address is already registered. If this is the case the connection information like IP and port is exchanged in step four. The broker also decides which peer is peer-1 and which peer is peer-2.
+
+After the connection information has been exchanged, a UDP connection between the peers will be established. Both peers need to actively send and receive messages simultaneously to punch a hole in NATs and firewalls. Figure ~\ref{fig:Sequence-NAT-Firewall} shows this.
+
+\begin{figure}[h]
+  \centering
+  \includesvg[width=400pt]{images/Sequence NAT Firewall.svg}
+  \caption{Example for NAT firewall}
+  \label{fig:Sequence-NAT-Firewall}
+\end{figure}
+
+NAT firewalls will block packages from unknown destinations. If Peer-1 tries to send data to Peer-2 without Peer-2 having sent anything to Peer-1, the data will be lost. This is visible in Figure \ref{fig:Sequence-NAT-Firewall}. Because of this, both peers have to send a message to one another to open the firewall. Due to time discrepancies between the peers, the one peer is probably first. The UDP packages will be blocked by the firewall or ignored by the receiver. 
+
+\begin{figure}[h]
+  \centering
+  \includesvg[width=400pt]{images/Sequence NAT Traversal.svg}
+  \caption{Sequence diagram for NAT Traversal}
+  \label{fig:Sequence-NAT-Traversal}
+\end{figure}
+
+Both peers exchange messages to verify that the connection is working correctly. Peer-1 sends a hello message to peer-2. Peer-2 then responds with an acknowledgment that the message was received back to peer-1. Peer-1 then sends an acknowledgment that the acknowledgment was received. This way, both peers sent and received data from another. If messages are lost or blocked by firewalls, the connection process will timeout and fail.
+
+\subsection{Connect over a Relay Server}
+\label{Connect-over-a-Relay-Server}
+
+\begin{figure}[h]
+  \centering
+  \includesvg[width=400pt]{images/Sequence Relay Server.svg}
+  \caption{Sequence diagram for relay connection}
+  \label{fig:Sequence-Relay-Server}
+\end{figure}
+
+If the peer-to-peer connection fails, providers and consumers can use a relay server to establish a connection. The broker, as a result of this, forwards the entire traffic between provider and consumer.
+
+Both peers connect to the broker over TCP. Afterward, both peers send the desired dial address to the broker. When the dial addresses can be matched, a success message is sent to both peers to confirm that the link was successful. After that, the same TCP connection is used to communicate between peers. See figure \ref{fig:Sequence-Relay-Server}.
+
+\section{Deploy the Simulation}
+
+After a successful connection, the deployment phase begins. In this phase, the provider is prepared to execute the simulation. The consumer creates a new session for the simulation on each provider. The simulation-id identifies a session and is generated to ensure less overhead when a consumer connects to a provider. They store for example if the simulation was uploaded and extracted. Sequence diagram \ref{fig:Sequence-Deploy-Detail} shows this process. Sessions also contain a deadline of how long the simulation is allowed to be stored and run on the provider. After a session is created, the simulation source will be uploaded to the provider and extracted to a directory with the simulation-id. 
+
+\begin{figure}[h]
+  \centering
+  \includesvg[width=400pt]{images/Sequence Deploy Detail.svg}
+  \caption{Sequence diagram for the deployment process with session details}
+  \label{fig:Sequence-Deploy-Detail}
+\end{figure}
+
+Because the simulations are written in C++, they need to be compiled before they can be executed. The simulation should only be compiled once for each architecture and operating system. The provider that establishes a connection first is chosen to do this. After the simulation is compiled, only the binaries and executables are compressed and transferred back to the consumers. Subsequently, the consumer distributes the data to all other providers. The binaries are not exchanged between the providers directly because they can always join or leave. Graphic \ref{fig:Sequence-Deploy-Arch} shows this process in a simplified way (session updates and extract operations are not included for clarity reasons).
+
+\begin{figure}[h]
+  \centering
+  \includesvg[width=400pt]{images/Sequence Deploy Arch.svg}
+  \caption{Sequence diagram of the deployment process with different architectures}
+  \label{fig:Sequence-Deploy-Arch}
+\end{figure}
+
+\section{Execute the Simulation}
+
+After the simulation is deployed, the simulation run numbers will be extracted. The run numbers can be distributed across many devices, and a parallelization process can start. Each provider can run multiple simulation-runs simultaneously, and every consumer can run simulations on various providers. The blocking or overuse of resources can stall the simulation process. Hence an allocation process is essential. Providers assign consumers a number of jobs they are allowed to start (see figure \ref{fig:Sequence-Execute}). If a simulation is canceled, the provider needs to reassign allocated resources. Because the consumer requests resources from multiple providers, more jobs can be assigned than required to run the simulation, which results in a blocking of precious resources. When this happens, the consumer is obligated to return the overallocated resources.
+
+\begin{figure}[h]
+  \centering
+  \includesvg[width=400pt]{images/Sequence Execute.svg}
+  \caption{Sequence diagram of simulation allocation and execution process.}
+  \label{fig:Sequence-Execute}
+\end{figure}
+
+With each allocation, the consumer can start a simulation run on the dedicated provider. Each simulation run can have a different execution time and write result files non deterministically within its project structure. If all runs are executed in parallel in the same directory, it is impossible to tell which process wrote what. To mitigate this, each process needs its own source directory. Copying the whole source directory can be taxing, to prevent this symlink links will be created for each file in the source directory. This procedure is called “Fake Copy” in this work. Within a fake copied directory, each simulation run can alter and write files. These files can be easily detected, compressed, stored, and transferred to the consumer without interfering with other simulation runs.
+
+The consumer downloads and merges the results from the provider with the original simulation source directory. The simulation source directory will contain the results of the simulation like they were run by OMNeT++ locally.
