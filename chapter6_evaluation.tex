@@ -84,7 +84,7 @@ Scenario opp-run-j1, opp-run-j2, and opp-run-j4 are the benchmark scenarios. The
   \label{fig:eval-benchmark}
 \end{figure}
 
-The benchmarks can be compared to execution times that use the tool developed by this thesis to measure how much overhead is added by the distribution and offloading process. The results can be viewed in Figure \ref{fig:eval-overhead}. The scenarios will use the same number of CPU cores to display parallelizing effects. Scenario clj1is only located on Patricks-MBP and runs with opp\_edge\_run and one worker that uses one CPU core. Opp-run-j1 needs 154 seconds for execution. Clj1 needs 192 seconds. The distribution process adds an overhead of 38 seconds to the simulation. When the scenario runs with four simulation jobs, the native version needs 48 seconds, and the distributed version needs 69 seconds. The overhead is 21 seconds. The concurrent version has less overhead than the distributed version because the download process happens faster because there is less delay for the downloader between finished jobs. 
+The benchmarks can be compared to execution times that use the tool developed by this thesis to measure how much overhead is added by the distribution and offloading process. The results can be viewed in Figure \ref{fig:eval-overhead}. The scenarios will use the same number of CPU cores to display parallelizing effects. Scenario MacBook-j1 is only located on Patricks-MBP and runs with opp\_edge\_run and one worker that uses one CPU core. Opp-run-j1 needs 154 seconds for execution. MacBook-j1 needs 192 seconds. The distribution process adds an overhead of 38 seconds to the simulation. When the scenario runs with four simulation jobs, the native version needs 48 seconds, and the distributed version needs 69 seconds. The overhead is 21 seconds. The concurrent version has less overhead than the distributed version because the download process happens faster because there is less delay for the downloader between finished jobs. 
 \begin{figure}[h]
   \centering
   %\includesvg[width=250pt]{images/eval/overhead/Mean execution duration per simulation.svg}
@@ -93,7 +93,7 @@ The benchmarks can be compared to execution times that use the tool developed by
   \label{fig:eval-overhead}
 \end{figure}
 
-Figure ~\ref{fig:eval-overhead-run} shows the average execution time per simulation-run. Scenario “clj4” has a slightly slower execution time because it is subject to thermal throttling effects. 
+Figure ~\ref{fig:eval-overhead-run} shows the average execution time per simulation-run. Scenario “MacBook-j4” has a slightly slower execution time because it is subject to thermal throttling effects. 
 
 \begin{figure}[h]
   \centering
@@ -110,7 +110,7 @@ Figure ~\ref{fig:eval-overhead-run} shows the average execution time per simulat
 
 Providers and consumers connect over three ways: over a TCP connection in the local network, over a peer-to-peer UDP connection or over a TCP connection over a relay server. These connections can have different transfer rates which influence how fast simulation results can be transferred between the consumer and providers. Slow transfer rates are a bottleneck.
 
-The local connection should be fastest, because the traffic doesn't leave the local network. The peer-to-peer connection should be second because it leaves the local network but is sent to the peer directly. The slowest should be the relay connection because the traffic is relayed by a central point. Figure ~\ref{fig:eval-connect-transfer} shows the download and upload transfer rates. The difference between the peer-to-peer and relay rates are neglectable, but it should be noted that at the time of the experiment no other client used the relay connection at the server. The peer-to-peer connection is preferred because it reduces traffic at the broker and is less susceptible.
+The local connection should be fastest, because the traffic doesn't leave the local network. The peer-to-peer connection should be second because it leaves the local network but is sent to the peer directly. The slowest should be the relay connection because the traffic is relayed by a central point. Figure \ref{fig:eval-connect-transfer} shows the download and upload transfer rates. The difference between the peer-to-peer and relay rates are neglectable, but it should be noted that at the time of the experiment no other client used the relay connection at the server. The peer-to-peer connection is preferred because it reduces traffic at the broker and is less susceptible.
 
 \begin{figure}[h]
   \centering
@@ -136,7 +136,7 @@ For convenience and security reasons the provider software can be started from a
 
 \section{Maximal Parallelization}
 
-The Figure \ref{fig:eval-aws-duration} shows the effect of nearly complete parallelization. The “tictoc” simulation example has a total of 78 simulation-runs. The scenario “cp.aws.c48xlarge.x2” has a total of 64 CPUs that can start 64 simulation-runs in parallel. The data shows that a simulation which is executed with one CPU core needs a total of 184 seconds. A simulation that is executed with 64 CPU cores just needs 18 seconds, which is a speed up of approximately 10 times.
+The Figure \ref{fig:eval-aws-duration} shows the effect of nearly complete parallelization. The “tictoc” simulation example has a total of 78 simulation-runs. The scenario “AWS-j64” has a total of 64 CPUs that can start 64 simulation-runs in parallel. The data shows that a simulation which is executed with one CPU core needs a total of 184 seconds. A simulation that is executed with 64 CPU cores just needs 18 seconds, which is a speed up of approximately 10 times.
 
 \begin{figure}[h]
   \centering
